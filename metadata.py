@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, abort, jsonify, current_app
+from flask import Flask, jsonify, current_app
 from boto import sts, iam
 import pytz
 
@@ -10,12 +10,41 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 REGION = "us-west-2"
 
 
-@app.route('/latest/meta-data')
-def handle_root():
-    """
-    Returns the root metadata keys.
-    """
-    return "\n".join(sorted(metadata().keys()))
+@app.route('/latest/meta-data/public-keys/0')
+def handle_public_key_0():
+    return "openssh-key"
+
+@app.route('/latest/meta-data/public-keys')
+def handle_public_keys():
+    return "0=my-public-key"
+
+@app.route('/latest/meta-data/reservation-id')
+def handle_reservation_id():
+    return "r-00000000"
+
+@app.route('/latest/meta-data/local-ipv4')
+@app.route('/latest/meta-data/public-ipv4')
+def handle_local_ipv4():
+    return "127.0.0.1"
+
+@app.route('/latest/meta-data/ami-id')
+def handle_ami_id():
+    return "a-00000000"
+
+@app.route('/latest/meta-data/local-hostname')
+@app.route('/latest/meta-data/hostname')
+@app.route('/latest/meta-data/public-hostname')
+def handle_public_hostname():
+    return "localhost"
+
+@app.route('/latest/meta-data/instance-id')
+def handle_instance_id():
+    return "i-00000000"
+
+
+@app.route('/latest/meta-data/placement/availability-zone')
+def handle_availability_zone():
+    return "us-west-2a"
 
 
 @app.route('/latest/meta-data/iam/security-credentials/<role_name>')
@@ -49,51 +78,5 @@ def handle_security_credentials(role_name):
         return credentials
 
 
-@app.route('/latest/meta-data/<path>')
-def handle_metadata(path):
-    """
-    Walks the metadata dictionary for a value. Returns 404 if None is returned.
-    :param path: a metadata path
-    """
-    item = walk(path.split('/'), metadata())
-    if item:
-        return item
-    else:
-        abort(404)
-
-
-def walk(tokens, data):
-    """
-    Iterates over a list of keys and walks a tree of dictionaries by until a leaf is found.
-    :param tokens: a list of tokens
-    :param data: a dictionary tree
-    :return: None or a leave of the tree
-    """
-    item = data.get(tokens[0])
-    if not item:
-        return None
-    elif isinstance(item, dict):
-        walk(tokens[1:], item)
-    else:
-        return item
-
-
-def metadata():
-    with app.app_context():
-        return getattr(current_app, '_metadata', dict())
-
-
 if __name__ == '__main__':
-    import sys
-    import json
-
-    with app.app_context():
-        current_app._metadata = dict()
-        if len(sys.argv) > 1:
-            try:
-                with open(sys.argv[1], 'rb') as f:
-                    current_app._metadata = json.load(f)
-            except IOError as e:
-                print sys.exit("missing configuration file")
-
     app.run(debug=True, host='0.0.0.0', port=80)
