@@ -47,6 +47,7 @@ def handle_availability_zone():
     return "us-west-2a"
 
 
+
 @app.route('/latest/meta-data/iam/security-credentials/<role_name>')
 def handle_security_credentials(role_name):
     """
@@ -76,6 +77,10 @@ def handle_security_credentials(role_name):
                                                                              DATE_FORMAT).replace(tzinfo=pytz.utc)
 
         return credentials
+
+@app.route('/latest/meta-data/iam/security-credentials')
+def handle_role():
+    return "somerole"
 
 
 if __name__ == '__main__':
