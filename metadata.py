@@ -1,8 +1,7 @@
-from datetime import datetime
-
-from flask import Flask, jsonify, current_app
-from boto import sts, iam
 import pytz
+from boto import sts, iam
+from datetime import datetime
+from flask import Flask, jsonify, current_app
 
 app = Flask(__name__)
 
@@ -14,28 +13,34 @@ REGION = "us-west-2"
 def handle_public_key_0():
     return "openssh-key"
 
+
 @app.route('/latest/meta-data/public-keys')
 def handle_public_keys():
     return "0=my-public-key"
 
+
 @app.route('/latest/meta-data/reservation-id')
 def handle_reservation_id():
     return "r-00000000"
+
 
 @app.route('/latest/meta-data/local-ipv4')
 @app.route('/latest/meta-data/public-ipv4')
 def handle_local_ipv4():
     return "127.0.0.1"
 
+
 @app.route('/latest/meta-data/ami-id')
 def handle_ami_id():
     return "a-00000000"
+
 
 @app.route('/latest/meta-data/local-hostname')
 @app.route('/latest/meta-data/hostname')
 @app.route('/latest/meta-data/public-hostname')
 def handle_public_hostname():
     return "localhost"
+
 
 @app.route('/latest/meta-data/instance-id')
 def handle_instance_id():
@@ -45,7 +50,6 @@ def handle_instance_id():
 @app.route('/latest/meta-data/placement/availability-zone')
 def handle_availability_zone():
     return "us-west-2a"
-
 
 
 @app.route('/latest/meta-data/iam/security-credentials/<role_name>')
@@ -78,9 +82,10 @@ def handle_security_credentials(role_name):
 
         return credentials
 
-@app.route('/latest/meta-data/iam/security-credentials')
+
+@app.route('/latest/meta-data/iam/security-credentials/')
 def handle_role():
-    return "somerole"
+    return "engineer"
 
 
 if __name__ == '__main__':
