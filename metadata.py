@@ -87,6 +87,10 @@ def handle_security_credentials(role_name):
 def handle_role():
     return "engineer"
 
+@app.after_request
+def apply_caching(response):
+    response.headers["content-type"] = "text/plain"
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
